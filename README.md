@@ -17,5 +17,5 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## Project Documentation (external Google Drive)
-RO: https://docs.google.com/document/d/1_NUb9yNW41OhRbhfv15M0gz37soCqehSYCOJvZlJURA/edit?usp=sharing
+## Project Documentation
+<a href="https://docs.google.com/document/d/1_NUb9yNW41OhRbhfv15M0gz37soCqehSYCOJvZlJURA/edit?usp=sharing">(RO)External Google Drive</a>

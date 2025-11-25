@@ -1,19 +1,19 @@
 #include <Arduino.h>
 #include "HX711.h"
 
-//Senzor Ultrasonic
+//Ultrasonic Sensor
 const int trigPin = 7;
 const int echoPin = 6;
 float duration, distance1, distance2;
-//Senzor Ultrasonic
+//Ultrasonic Sensor
 
-//Senzor Greutate
+//Weight Sensor
 const int LOADCELL_DOUT_PIN = 2;
 const int LOADCELL_SCK_PIN = 3;
 HX711 scale;
-//Senzor Greutate
+//Weight Sensor
 
-//Motoare
+//DC Motors
 
 // Pins for Motor 1
 const int motor1Dir1 = 10;  // Direction pin 1 for motor 1
@@ -24,37 +24,38 @@ const int motor2Dir1 = 8;  // Direction pin 1 for motor 2
 const int motor2Dir2 = 9;  // Direction pin 2 for motor 2
 const int motor2Enable = 10; // Enable pin (PWM) for motor 2
 
-//Motoare
+//DC Motors
 
-void motorBazaRotatiePLUS(float valoare)
+
+void BaseMotorRotationPLUS(float value)
 {
   digitalWrite(motor1Dir1, HIGH); 
   digitalWrite(motor1Dir2, LOW);
-  delay(valoare);
+  delay(value);
 }
-void motorBazaRotatieMINUS(float valoare)
+void BaseMotorRotationMINUS(float value)
 {
   digitalWrite(motor1Dir1, LOW); 
   digitalWrite(motor1Dir2, HIGH);
-  delay(valoare);
+  delay(value);
 }
-void motorBazaSTOP()
+void BaseMotorSTOP()
 {
   digitalWrite(motor1Dir1, LOW); 
   digitalWrite(motor1Dir2, LOW);
 }
 
-void motor2RotatiePLUS(float valoare)
+void Motor2RotationPLUS(float value)
 {
   digitalWrite(motor2Dir1, HIGH); 
   digitalWrite(motor2Dir2, LOW);
-  delay(valoare);
+  delay(value);
 }
-void motor2RotatieMINUS(float valoare)
+void Motor2RotationMinus(float value)
 {
   digitalWrite(motor2Dir1, LOW); 
   digitalWrite(motor2Dir2, HIGH);
-  delay(valoare);
+  delay(value);
 }
 void motor2STOP()
 {
@@ -64,39 +65,40 @@ void motor2STOP()
 
 
 void setup() {
-  //Senzor Ultrasonic
+  //Ultrasonic Sensor
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   Serial.begin(57600);
-  //Senzor Ultrasonic
+  //Ultrasonic Sensor
 
-  //Senzor Greutate
+  //Weight Sensor
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   scale.set_scale(98.827);
 
   scale.tare();               // reset the scale to 0
-  //Senzor Greutate
+  //Weight Sensor
 
-  //Motoare
+  //DC Motors
    // Set all motor control pins as OUTPUT
   pinMode(motor1Dir1, OUTPUT);
   pinMode(motor1Dir2, OUTPUT);
 
   pinMode(motor2Dir1, OUTPUT);
   pinMode(motor2Dir2, OUTPUT);
-  //Motoare
+  //DC Motors
 
-  motorBazaSTOP();
+  BaseMotorSTOP();
   motor2STOP();  
 
 }
 
 
-void loop() {
+void loop() 
+{
   delay(500);
-  //Volumul vasului este de 207 centimetri^2
-  //Baza este 426.38, inaltimea 9
-  //Senzor Ultrasonic
+  //volumee of the vase is 207 cm^2
+  //Base is 426.38,  height is 9
+  //Ultrasonic Sensor
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -108,44 +110,44 @@ void loop() {
   Serial.print("Distance: ");
   Serial.println(distance1, 6);
   delay(100);
-  //Senzor Ultrasonic
+  //Ultrasonic Sensor
 
-  Serial.println("Initializare Gata - Plaseaza greutatea pe cantar");
+  Serial.println("Initialization Done -- Place Object on the Scale");
   delay(10000);
-  float greutate;
+  float mass;
   Serial.print("\t| average:\t");
-  greutate = scale.get_units(10);
-  greutate = 4.09948;
-  Serial.println(greutate, 5);
+  mass = scale.get_units(10);
+  mass = 4.09948;
+  Serial.println(mass, 5);
   delay(1000);
-  ///RIDICARE DE PE CANTAR
-  Serial.println("Incepe ridicarea de pe cantar");
+  ///Lift from scale
+  Serial.println("Lift from scale - beginning");
   bool ok = true;
   while (ok) {
     // Ask for the motor rotation value
-    Serial.println("Introduceti valoare (durata pentru motor):");
+    Serial.println("Add duration for motor spin");
 
-    int valoare = -1; // Initialize to an invalid value
-    while (valoare < 0) 
+    int value = -1; // Initialize to an invalid value
+    while (value < 0) 
     { // Ensure we get a positive input
       while (Serial.available() == 0) 
       {
         // Wait for input
       }
-      valoare = Serial.parseInt();
-      if (valoare < 0) 
+      value = Serial.parseInt();
+      if (value < 0) 
       {
-        Serial.println("Valoare invalida. Introduceti o valoare pozitiva.");
+        Serial.println("Invalid value. Input a positive value.");
       }
     }
 
     // Perform motor operation
-    motor2RotatiePLUS(valoare);
+    Motor2RotationPLUS(value);
     motor2STOP();
 
-    Serial.print("Motorul 2 a urcat timp de ");
-    Serial.print(valoare);
-    Serial.println(" unitati");
+    Serial.print("Motor 2 movent for ");
+    Serial.print(value);
+    Serial.println(" units");
 
     // Flush the Serial buffer
     while (Serial.available() > 0) 
@@ -154,7 +156,7 @@ void loop() {
     }
 
     // Ask if the user wants to continue
-    Serial.println("Treceti la urmatorul pas? 1-DA, 0-NU");
+    Serial.println("Go to next step? 1 - Yes 0 - No");
 
     int response = -1; // Initialize to an invalid value
     while (response != 0 && response != 1) 
@@ -166,7 +168,7 @@ void loop() {
       response = Serial.parseInt();
       if (response != 0 && response != 1) 
       {
-        Serial.println("Input invalid. Va rog introduceti 1 sau 0.");
+        Serial.println("Input invalid. Please input 1 or 0.");
       }
     }
 
@@ -183,32 +185,32 @@ void loop() {
     }
 
   }
-  ///RIDICARE DE PE CANTAR GATA
-  Serial.println("Ridicarea de pe cantar gata, incepe mutarea deasupra apei");
+  ///Lift from scale Done
+  Serial.println("Lift from scale done, beggining movement above water.");
   ok=true;
-  ///INVARTE PANA DEASUPRA LA APA
+// Spin until above water
   while (ok) {
     // Ask for the motor rotation value
-    Serial.println("Introduceti valoare (durata pentru motor):");
+    Serial.println("Add duration for motor spin");
 
-    int valoare = -1; // Initialize to an invalid value
-    while (valoare < 0) { // Ensure we get a positive input
+    int value = -1; // Initialize to an invalid value
+    while (value < 0) { // Ensure we get a positive input
       while (Serial.available() == 0) {
         // Wait for input
       }
-      valoare = Serial.parseInt();
-      if (valoare < 0) {
-        Serial.println("Valoare invalida. Introduceti o valoare pozitiva.");
+      value = Serial.parseInt();
+      if (value < 0) {
+        Serial.println("Invalid value. Input a positive value.");
       }
     }
 
     // Perform motor operation
-    motorBazaRotatieMINUS(valoare);
-    motorBazaSTOP();
+    BaseMotorRotationMINUS(value);
+    BaseMotorSTOP();
 
-    Serial.print("Motorul 2 a urcat timp de ");
-    Serial.print(valoare);
-    Serial.println(" unitati");
+    Serial.print("Motor 2 movent for ");
+    Serial.print(value);
+    Serial.println(" units");
 
     // Flush the Serial buffer
     while (Serial.available() > 0) {
@@ -216,7 +218,7 @@ void loop() {
     }
 
     // Ask if the user wants to continue
-    Serial.println("Treceti la urmatorul pas? 1-DA, 0-NU");
+    Serial.println("Go to next step? 1 - Yes 0 - No");
 
     int response = -1; // Initialize to an invalid value
     while (response != 0 && response != 1) {
@@ -225,7 +227,7 @@ void loop() {
       }
       response = Serial.parseInt();
       if (response != 0 && response != 1) {
-        Serial.println("Input invalid. Va rog introduceti 1 sau 0.");
+        Serial.println("Input invalid. Please input 1 or 0.");
       }
     }
 
@@ -238,32 +240,32 @@ void loop() {
       Serial.read();
     }
   }
-  ///INVARTE PANA DEASUPRA LA APA GATA
-  Serial.println("Mutarea deasupra apei gata, incepe coborarea in apa");
+// Spin until above water DONE
+  Serial.println("Moving above water done, begginnig lowering in water.");
   ok=true;
   ///COBOARA IN APA
   while (ok) {
     // Ask for the motor rotation value
-    Serial.println("Introduceti valoare (durata pentru motor):");
+    Serial.println("Add duration for motor spin");
 
-    int valoare = -1; // Initialize to an invalid value
-    while (valoare < 0) { // Ensure we get a positive input
+    int value = -1; // Initialize to an invalid value
+    while (value < 0) { // Ensure we get a positive input
       while (Serial.available() == 0) {
         // Wait for input
       }
-      valoare = Serial.parseInt();
-      if (valoare < 0) {
-        Serial.println("Valoare invalida. Introduceti o valoare pozitiva.");
+      value = Serial.parseInt();
+      if (value < 0) {
+        Serial.println("Invalid value. Input a positive value.");
       }
     }
 
     // Perform motor operation
-    motor2RotatieMINUS(valoare);
+    Motor2RotationMinus(value);
     motor2STOP();
 
-    Serial.print("Motorul 2 a urcat timp de ");
-    Serial.print(valoare);
-    Serial.println(" unitati");
+    Serial.print("Motor 2 movent for ");
+    Serial.print(value);
+    Serial.println(" units");
 
     // Flush the Serial buffer
     while (Serial.available() > 0) {
@@ -271,7 +273,7 @@ void loop() {
     }
 
     // Ask if the user wants to continue
-    Serial.println("Treceti la urmatorul pas? 1-DA, 0-NU");
+    Serial.println("Go to next step? 1 - Yes 0 - No");
 
     int response = -1; // Initialize to an invalid value
     while (response != 0 && response != 1) {
@@ -280,7 +282,7 @@ void loop() {
       }
       response = Serial.parseInt();
       if (response != 0 && response != 1) {
-        Serial.println("Input invalid. Va rog introduceti 1 sau 0.");
+        Serial.println("Input invalid. Please input 1 or 0.");
       }
     }
 
@@ -295,11 +297,11 @@ void loop() {
     }
 
   }
-  ///COBOARA IN APA GATA
-  Serial.println("Coborarea in apa gata, masuram distanta si incepe ridicarea din apa");
+//Lowering in water done.
+  Serial.println("Lowering in water done, begin lifting out of water.");
   delay(1000);
 
-  //Senzor Ultrasonic
+  //Ultrasonic Sensor
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -312,35 +314,35 @@ void loop() {
   Serial.print("Distance: ");
   Serial.println(distance2, 6);
   delay(100);
-  //Senzor Ultrasonic
-  Serial.println("Incepe ridicarea din apa");
+  //Ultrasonic Sensor
+  Serial.println("Beggining lifting out of water.");
   ok=true;
-  ///RIDICA DIN APA
+  ///Lifting out of water.
   while (ok) {
     // Ask for the motor rotation value
-    Serial.println("Introduceti valoare (durata pentru motor):");
+    Serial.println("Add duration for motor spin");
 
-    int valoare = -1; // Initialize to an invalid value
-    while (valoare < 0) 
+    int value = -1; // Initialize to an invalid value
+    while (value < 0) 
     { // Ensure we get a positive input
       while (Serial.available() == 0) 
       {
         // Wait for input
       }
-      valoare = Serial.parseInt();
-      if (valoare < 0) 
+      value = Serial.parseInt();
+      if (value < 0) 
       {
-        Serial.println("Valoare invalida. Introduceti o valoare pozitiva.");
+        Serial.println("Invalid value. Input a positive value.");
       }
     }
 
     // Perform motor operation
-    motor2RotatiePLUS(valoare);
+    Motor2RotationPLUS(value);
     motor2STOP();
 
-    Serial.print("Motorul 2 a urcat timp de ");
-    Serial.print(valoare);
-    Serial.println(" unitati");
+    Serial.print("Motor 2 movent for ");
+    Serial.print(value);
+    Serial.println(" units");
 
     // Flush the Serial buffer
     while (Serial.available() > 0) 
@@ -349,7 +351,7 @@ void loop() {
     }
 
     // Ask if the user wants to continue
-    Serial.println("Treceti la urmatorul pas? 1-DA, 0-NU");
+    Serial.println("Go to next step? 1 - Yes 0 - No");
 
     int response = -1; // Initialize to an invalid value
     while (response != 0 && response != 1) 
@@ -361,7 +363,7 @@ void loop() {
       response = Serial.parseInt();
       if (response != 0 && response != 1) 
       {
-        Serial.println("Input invalid. Va rog introduceti 1 sau 0.");
+        Serial.println("Input invalid. Please input 1 or 0.");
       }
     }
 
@@ -378,38 +380,38 @@ void loop() {
     }
 
   }
-  ///RIDICA DIN APA GATA
-  Serial.println("Ridicarea din apa gata");
+  ///Lifting out of water Done
+  Serial.println("Lifting out of water Done");
   delay(1000);
-  Serial.println("Obiectul are o greutate de ");
-  Serial.print(greutate);
-  Serial.print(" grame.");
+  Serial.println("Object's mass is ");
+  Serial.print(mass);
+  Serial.print(" grams.");
   Serial.println("");
-  float volum = (distance2-distance1) * 426.38;
-  //float volum = 0.006409*426.38;
+  float volume = (distance2-distance1) * 426.38;
+  //float volume = 0.006409*426.38;
 
-  Serial.println("Obiectul are un volum de ");
+  Serial.println("Object's volume is  ");
   delay(100);
-  Serial.print(volum);
+  Serial.print(volume);
   delay(100);
   Serial.print(" cm^3.");
   delay(100);
-  float densitate = greutate / volum ;
+  float density = mass / volume ;
   Serial.println("");
-  Serial.println("Astfel, obiectul are o densitate de ");
-  Serial.print(densitate);
+  Serial.println("Object's density is  ");
+  Serial.print(density);
   Serial.print(" g/cm^3.");
   Serial.println("");
   delay(100);
-  Serial.println("Densitatea plasticului PET este de 1.38-1.41 g/cm^3");
-  Serial.println("Densitatea aluminiului este de 2.7 g/cm^3");
-  Serial.println("Densitatea sticlei(sticla din recipiente) este de 2.4-2.6 g/cm^3");
+  Serial.println("Plastic PET density is 1.38-1.41 g/cm^3");
+  Serial.println("Aluminium denisty is 2.7 g/cm^3");
+  Serial.println("Glass denisty is 2.4-2.6 g/cm^3");
   delay(100);
-  if(densitate > 2.7)
-    Serial.println("Astfel, recipientul masurat este din aluminiu !");
-  else if(densitate > 1.9)
-    Serial.println("Astfel, recipientul masurat este din sticla !");
+  if(density > 2.7)
+    Serial.println("So, the object is made of aluminium !");
+  else if(density > 1.9)
+    Serial.println("So, the object is made of glass !");
   else
-    Serial.println("Astfel, recipientul masurat este din plastic !");
+    Serial.println("So, the object is made of plastic !");
   delay(99999);
 }
